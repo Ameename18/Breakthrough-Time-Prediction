@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['XGboost,RF,SVR.py', 'XGboost.py', 'train.py', 'app.py', 'app2.py', 'main.py', 'Main -Code.py', 'code.py', 'RppCode.py']
+recent_files = ['RppCode.py', 'XGboost,RF,SVR.py', 'XGboost.py', 'train.py', 'app.py', 'app2.py', 'main.py', 'Main -Code.py', 'code.py', 'RppCode2.py', 'RPP-App.py']
 
 [main]
 version = 0.2.0
