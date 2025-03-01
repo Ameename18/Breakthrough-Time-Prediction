@@ -15,14 +15,18 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import r2_score, mean_squared_error
 import os
 
+# Define dataset path dynamically
+file_path = "https://raw.githubusercontent.com/Ameename18/Breakthrough-Time-Prediction/main/DatsetRPP.xlsx"
+
 # Load dataset
-file_path = "C:/Users/ameen/OneDrive/Documents/Minor Project/DatsetRPP.xlsx"
-df = pd.read_excel(file_path)
+try:
+    df = pd.read_excel(file_path, engine="openpyxl")  # Ensure correct engine for .xlsx files
+    df.dropna(inplace=True)  # Handle missing values
+except Exception as e:
+    st.error(f"Failed to load dataset: {str(e)}")
+    st.stop()
 
-# Handle missing values
-df.dropna(inplace=True)
-
-# Define features and target variables
+# Define features and target variable
 features = ["Q (mL/min)", "Z (cm)", "C₀ (mg/L)", "Mass of Adsorbent (g)", "Mass Transfer Zone (cm)"]
 target = "Breakthrough Time (min)"
 
@@ -46,6 +50,7 @@ param_grid = {
 
 best_models = {}
 
+# Train or Load Models
 for name, model in models.items():
     model_path = f"{name.replace(' ', '_').lower()}_model.pkl"
     if os.path.exists(model_path):
@@ -57,23 +62,30 @@ for name, model in models.items():
             best_models[name] = grid_search.best_estimator_
             joblib.dump(best_models[name], model_path)
         except Exception as e:
-            continue
+            st.warning(f"Model training for {name} failed: {str(e)}")
 
 # Streamlit UI
-st.title("Breakthrough Time Prediction App")
-st.write("Enter the feature values to predict breakthrough time.")
+st.title("🌟 Breakthrough Time Prediction App")
+st.write("Enter the feature values below to predict breakthrough time.")
 
+# Sidebar Input
+st.sidebar.header("Enter Feature Values")
 user_data = {}
-for feature in features:
-    user_data[feature] = st.number_input(f"Enter {feature}", min_value=0.0, format="%.2f")
 
-if st.button("Predict"):
+for feature in features:
+    user_data[feature] = st.sidebar.number_input(f"{feature}", min_value=0.0, format="%.2f")
+
+# Predict Button
+if st.sidebar.button("Predict"):
     user_input = pd.DataFrame([user_data])
-    
-    predictions = {}
-    for name, model in best_models.items():
-        predictions[name] = model.predict(user_input)[0]
-    
-    st.write("## Predictions")
-    for name, value in predictions.items():
-        st.write(f"**{name}**: {value:.2f} min")
+
+    if not best_models:
+        st.error("No trained models available for prediction.")
+    else:
+        predictions = {name: model.predict(user_input)[0] for name, model in best_models.items()}
+        
+        st.write("## 🔍 Predictions:")
+        for name, value in predictions.items():
+            st.success(f"**{name}:** {value:.2f} min")
+
+
